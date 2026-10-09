@@ -6,7 +6,7 @@ int size = 0;
 int top = -1;
 int a[1000];
 
-// Pushing an element onto the stack(Method 1[Basic])
+// Pushing an element onto the stack(Method 1[Static Array])
 void push(int e) {
     if (size == maxSize) {
         printf("Stack Overflow\n");
@@ -29,7 +29,7 @@ struct stack {
     int a[1000];
 };
 
-// Pushing an element at the top of the stack(Method 2[ptr method])
+// Pushing an element at the top of the stack(Method 2[Dynamic Array])
 void push(struct stack *s, int e) {
     if (s->size == s->maxSize) {
         printf("Stack Overflow\n");
@@ -43,7 +43,7 @@ void push(struct stack *s, int e) {
     printf("%d is pushed to stack\n", e);
 }
 
-//Popping an element from a stack(Method 1[Basic])
+//Popping an element from a stack(Method 1[Static array])
 
 int pop(){
     if(size==-){
