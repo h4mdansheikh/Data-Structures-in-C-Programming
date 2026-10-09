@@ -10,6 +10,7 @@ typedef struct{
   int top;         //Index of the current top element
   int capacity;    //current allocated size of arr
 } Stack;
+
 Stack* createStack(int initialCapacity){
   Stack* = (Stack*)malloc(sizeof(Stack));
   s->capacity-intialCapacity;
@@ -18,4 +19,26 @@ Stack* createStack(int initialCapacity){
   return s;
 }
 
+void resizeStack(Stack *s){
+  s->capacity*=2;
+  s->arr=(int*)realloc(s->arr,s->capacity*sizeof(int));
+  printf("[Resized stack to capacity %d]\n",s->capacity);
+}
+
+//-----Push Operation-----\\
+void push(Stack*s , int item){
+  if(s->top==s->capacity-1)
+      resizeStack(s);
+  s->arr[++(s->top)]=item;
+}
+
+//-----Pop Operation-----\\
+
+int pop(Stack *s){
+  if(s->top==-1){
+    printf("Stack Underflow\n");
+    return -1;
+  }
+  return s->arr[(s->top)--]
+}
 
