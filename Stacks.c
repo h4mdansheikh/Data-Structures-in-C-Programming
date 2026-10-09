@@ -1,14 +1,22 @@
-
 #include <stdio.h>
 #include <stdbool.h>
 
-// Creating a stack
+// ==================================================
+//               STACK IMPLEMENTATION
+// ==================================================
+
+// Stack configuration and initialization
 int maxSize = 1000;
 int size = 0;
 int top = -1;
 int a[1000];
 
-// Push operation
+
+// ==================================================
+//             PUSH - INSERT AN ELEMENT
+// ==================================================
+
+// Inserts a new element at the top of the stack
 void push(int e) {
     if (size == maxSize) {
         printf("Stack Overflow\n");
@@ -22,7 +30,12 @@ void push(int e) {
     printf("%d is pushed to stack\n", e);
 }
 
-// Pop operation
+
+// ==================================================
+//             POP - REMOVE AN ELEMENT
+// ==================================================
+
+// Removes and returns the top element of the stack
 int pop() {
     if (size == 0) {
         printf("Stack Underflow\n");
@@ -36,7 +49,12 @@ int pop() {
     return e;
 }
 
-// Peek operation
+
+// ==================================================
+//             PEEK - VIEW THE TOP ELEMENT
+// ==================================================
+
+// Displays the top element without removing it
 void peek() {
     if (size == 0) {
         printf("Stack Empty\n");
@@ -46,16 +64,26 @@ void peek() {
     printf("Top element is: %d\n", a[top]);
 }
 
-// Check if stack is empty
+
+// ==================================================
+//           isEmpty - CHECK STACK STATUS
+// ==================================================
+
+// Returns true if the stack is empty; false otherwise
 bool isEmpty() {
-     if(size==0){
+    if (size == 0) {
         return true;
-    }else{
+    } else {
         return false;
     }
 }
 
-// Main function
+
+// ==================================================
+//                  MAIN FUNCTION
+// ==================================================
+
+// Demonstrates the basic operations of a stack
 int main() {
     push(10);
     push(20);
