@@ -2,6 +2,8 @@
 //Stack Implementation using dynamically allocated array\\
 //=======================================================\\
 
+
+
 #include<stdio.h>
 #include<stdlib.h>
 
@@ -41,4 +43,22 @@ int pop(Stack *s){
   }
   return s->arr[(s->top)--]
 }
+
+//-----Peek Operation-----\\
+
+int peek(Stack *s){
+  if(s->top==-1({
+    printf("Stack is empty\n");
+    return -1;
+  }
+return s->arr[s->top];
+}
+
+//-----Check is Stack is empty-----\\
+
+int isEmpty(Stack *s){
+  return s->top==-1;
+}
+
+//-----Display Stack-----\\
 
