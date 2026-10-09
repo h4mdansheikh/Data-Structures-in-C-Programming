@@ -1,93 +1,161 @@
-//=====================================================\\
-//Stack Implementation using dynamically allocated array\\
-//=======================================================\\
+#include <stdio.h>
+#include <stdlib.h>
 
+//=====================================================
+// STACK IMPLEMENTATION USING A DYNAMICALLY ALLOCATED ARRAY
+//=====================================================
 
-
-#include<stdio.h>
-#include<stdlib.h>
-
-typedef struct{
-  int *arr;        //Pointer to the dynamically allocated array
-  int top;         //Index of the current top element
-  int capacity;    //current allocated size of arr
+typedef struct {
+    int *arr;       // Pointer to the dynamically allocated array
+    int top;        // Index of the current top element
+    int capacity;   // Current allocated capacity of the array
 } Stack;
 
-Stack* createStack(int initialCapacity){
-  Stack* = (Stack*)malloc(sizeof(Stack));
-  s->capacity-intialCapacity;
-  s->top=-1;
-  s->arr=(int*)malloc(s->capacity*sizeof(int));
-  return s;
+
+//=====================================================
+// CREATE STACK
+//=====================================================
+
+Stack* createStack(int initialCapacity) {
+    Stack *s = (Stack*)malloc(sizeof(Stack));
+
+    if (s == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+
+    s->capacity = initialCapacity;
+    s->top = -1;
+
+    s->arr = (int*)malloc(s->capacity * sizeof(int));
+
+    if (s->arr == NULL) {
+        printf("Memory allocation failed\n");
+        free(s);
+        exit(1);
+    }
+
+    return s;
 }
 
-void resizeStack(Stack *s){
-  s->capacity*=2;
-  s->arr=(int*)realloc(s->arr,s->capacity*sizeof(int));
-  printf("[Resized stack to capacity %d]\n",s->capacity);
+
+//=====================================================
+// RESIZE STACK - DOUBLE THE CAPACITY
+//=====================================================
+
+void resizeStack(Stack *s) {
+    s->capacity *= 2;
+
+    int *temp = (int*)realloc(
+        s->arr, s->capacity * sizeof(int)
+    );
+
+    if (temp == NULL) {
+        printf("Memory reallocation failed\n");
+        exit(1);
+    }
+
+    s->arr = temp;
+
+    printf("[Resized stack to capacity %d]\n", s->capacity);
 }
 
-//-----Push Operation-----\\
-void push(Stack*s , int item){
-  if(s->top==s->capacity-1)
-      resizeStack(s);
-  s->arr[++(s->top)]=item;
+
+//=====================================================
+// PUSH - INSERT AN ELEMENT
+//=====================================================
+
+void push(Stack *s, int item) {
+    if (s->top == s->capacity - 1) {
+        resizeStack(s);
+    }
+
+    s->arr[++(s->top)] = item;
 }
 
-//-----Pop Operation-----\\
 
-int pop(Stack *s){
-  if(s->top==-1){
-    printf("Stack Underflow\n");
-    return -1;
-  }
-  return s->arr[(s->top)--]
+//=====================================================
+// POP - REMOVE THE TOP ELEMENT
+//=====================================================
+
+int pop(Stack *s) {
+    if (s->top == -1) {
+        printf("Stack Underflow\n");
+        return -1;
+    }
+
+    return s->arr[(s->top)--];
 }
 
-//-----Peek Operation-----\\
 
-int peek(Stack *s){
-  if(s->top==-1({
-    printf("Stack is empty\n");
-    return -1;
-  }
-return s->arr[s->top];
+//=====================================================
+// PEEK - VIEW THE TOP ELEMENT
+//=====================================================
+
+int peek(Stack *s) {
+    if (s->top == -1) {
+        printf("Stack is empty\n");
+        return -1;
+    }
+
+    return s->arr[s->top];
 }
 
-//-----Check is Stack is empty-----\\
 
-int isEmpty(Stack *s){
-  return s->top==-1;
+//=====================================================
+// CHECK WHETHER THE STACK IS EMPTY
+//=====================================================
+
+int isEmpty(Stack *s) {
+    return s->top == -1;
 }
 
-//-----Display Stack-----\\
 
-void display(Stack *s){
-  printf("Stack (bottom->top): ");
-  for (int i-0; i<=s->top;i++)
-    printf("%d".s->arr[i]);
-  printf("\n");
+//=====================================================
+// DISPLAY ALL STACK ELEMENTS
+//=====================================================
+
+void display(Stack *s) {
+    printf("Stack (bottom -> top): ");
+
+    for (int i = 0; i <= s->top; i++) {
+        printf("%d ", s->arr[i]);
+    }
+
+    printf("\n");
 }
 
-//-----Freeing the Stack-----\\
-void freeStack(Stack *s){
-  free(s->arr);
-  free(s);
+
+//=====================================================
+// FREE ALLOCATED MEMORY
+//=====================================================
+
+void freeStack(Stack *s) {
+    free(s->arr);
+    free(s);
 }
 
-//================================\\
-//---------Main Function-----------\\
-//==================================\\
 
-int main(){
-     Stack *s=createStack(2);
-     push(s, 10);
-     push(s, 20);
-     push(s, 30);                         /* triggers automatic resize */
-     push(s, 40);
-     display(s);
-     printf("Popped: %d\n", pop(s));
-     display(s);
-     freeStack(s);
-     return 0;
+//=====================================================
+// MAIN FUNCTION - TEST STACK OPERATIONS
+//=====================================================
+
+int main(void) {
+    Stack *s = createStack(2);
+
+    push(s, 10);
+    push(s, 20);
+    push(s, 30);  // Triggers automatic resizing
+    push(s, 40);
+
+    display(s);
+
+    printf("Top element: %d\n", peek(s));
+    printf("Popped: %d\n", pop(s));
+
+    display(s);
+
+    freeStack(s);
+
+    return 0;
 }
