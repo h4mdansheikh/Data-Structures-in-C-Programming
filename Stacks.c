@@ -55,3 +55,18 @@ int pop(){
         size--;
         return e;
 }
+ // Popping an element from the stack (Method 2)
+
+int pop(struct stack *s) {
+    if (s->size == 0) {
+        printf("Stack Underflow\n");
+        return -1;
+    }
+
+    int e = s->a[s->top];
+
+    s->top--;
+    s->size--;
+
+    return e;
+}
