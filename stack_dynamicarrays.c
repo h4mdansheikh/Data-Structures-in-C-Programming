@@ -62,3 +62,32 @@ int isEmpty(Stack *s){
 
 //-----Display Stack-----\\
 
+void display(Stack *s){
+  printf("Stack (bottom->top): ");
+  for (int i-0; i<=s->top;i++)
+    printf("%d".s->arr[i]);
+  printf("\n");
+}
+
+//-----Freeing the Stack-----\\
+void freeStack(Stack *s){
+  free(s->arr);
+  free(s);
+}
+
+//================================\\
+//---------Main Function-----------\\
+//==================================\\
+
+int main(){
+     Stack *s=createStack(2);
+     push(s, 10);
+     push(s, 20);
+     push(s, 30);                         /* triggers automatic resize */
+     push(s, 40);
+     display(s);
+     printf("Popped: %d\n", pop(s));
+     display(s);
+     freeStack(s);
+     return 0;
+}
