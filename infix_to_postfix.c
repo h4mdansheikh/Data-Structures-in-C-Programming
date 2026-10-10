@@ -24,3 +24,13 @@ int precedence(char ch){
   if (ch=='+' || ch=='-') return 1;
   return -1;
 }
+
+int isRightAssociative(char ch){
+  return ch=='^';
+}
+
+void infixtoPostfix(char infix[], char postfix[]){
+  int i, k=0;
+  for in
+  
+}
