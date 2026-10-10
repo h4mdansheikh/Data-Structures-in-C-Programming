@@ -1,16 +1,27 @@
-Why postfix matters for computers: infix expressions require the evaluator to know operator precedence and
-associativity and to use parentheses to override them, which makes machine evaluation awkward. Postfix (and
-prefix) notation removes ambiguity entirely — no parentheses and no precedence rules are needed to evaluate
-them, because the position of each operator unambiguously fixes which operands it applies to. This is why
-compilers translate infix expressions typed by the programmer into postfix (or a similar form) internally before
-evaluating or generating code.
+## Why Postfix Notation Matters for Computers
 
+Infix expressions require the evaluator to understand operator precedence and associativity and to use parentheses to override them. This makes machine evaluation more complicated.
 
+Postfix (and prefix) notation removes ambiguity. No parentheses or operator precedence rules are needed during evaluation because the position of each operator unambiguously determines which operands it applies to.
 
-Operator Meaning---------------Precedence (higher = bindstighter)--------Associativity----|
-^ (or **)Exponentiation          |            3 (highest)           |    Right to Left    |
-* , / Multiplication, Division   |            2                     |    Left to Right    |
-+ , - Addition, Subtraction      |            1 (lowest)            |    Left to Right    |
-( ) Parentheses                  |            Highest — forces      |                     |
-                                 |            evaluation first —    |                     |
----------------------------------|----------------------------------|---------------------|
+Compilers may transform infix expressions into postfix notation or other intermediate representations before evaluation or code generation.
+
+## Operator Precedence and Associativity
+
+| Operator | Meaning                  | Precedence (Higher = Binds Tighter) | Associativity |
+|----------|--------------------------|:-----------------------------------:|---------------|
+| `^`      | Exponentiation           | 3 (Highest)                         | Right to Left |
+| `*`      | Multiplication           | 2                                   | Left to Right |
+| `/`      | Division                 | 2                                   | Left to Right |
+| `+`      | Addition                 | 1                                   | Left to Right |
+| `-`      | Subtraction              | 1                                   | Left to Right |
+| `( )`    | Parentheses              | Override normal precedence          | —             |
+
+### Important Notes
+
+- **Precedence:** Determines which operator is evaluated first.
+- **Associativity:** Determines the evaluation order when operators have equal precedence.
+- **Parentheses:** Override normal operator precedence and force the enclosed expression to be evaluated first.
+- **Postfix notation:** Operators appear after their operands, eliminating the need for parentheses and precedence rules during evaluation.
+
+> **Note:** In C, `^` represents bitwise XOR, not exponentiation. The exponentiation precedence shown above applies to mathematical notation and languages that use `^` for exponentiation.
