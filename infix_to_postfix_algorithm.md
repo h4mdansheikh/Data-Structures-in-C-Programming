@@ -25,3 +25,13 @@ Compilers may transform infix expressions into postfix notation or other interme
 - **Postfix notation:** Operators appear after their operands, eliminating the need for parentheses and precedence rules during evaluation.
 
 > **Note:** In C, `^` represents bitwise XOR, not exponentiation. The exponentiation precedence shown above applies to mathematical notation and languages that use `^` for exponentiation.
+
+
+##Infix to Postfix Conversion
+
+Idea. Scan the infix expression left to right. Operands go straight to the output. Operators are temporarily held
+on a stack so that higher-precedence operators can be emitted before lower-precedence ones, which is exactly
+what a stack (LIFO) is good at.
+
+##Algorithm Infix to Postfix
+
