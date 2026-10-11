@@ -31,6 +31,36 @@ int isRightAssociative(char ch){
 
 void infixtoPostfix(char infix[], char postfix[]){
   int i, k=0;
-  for in
-  
+  for(i=0; infix[i] !='\0';i++){
+    char c=infix[i];
+    if(isalnum(c)){
+      postfix[k++]=c;
+    }
+    else if(c=='('){
+      push(c);
+    }
+    else if(c==')'){
+      while(top!=-1 && peekTop() !='(')
+        postxi[k++]=pop();
+      pop();
+    }
+    else{
+      while(top!=-1 && peektop() !='('&& (precedence(peekTop())>precedence(c) || (precedence(peekTop))==precedence(c) && !isRightAssociative(c)))){
+        postfix[k++]=pop();
+      }
+      push(c);
+    }
+  }
+  while(top!=-1)
+    postfix[k++]=pop();
+  postfix[k]='\0';
+}
+
+int main(){
+  char int[MAX],postfix[MAX];
+  printf("Enter infix expression(No SPACES): ");
+  scanf("%s",infix);
+  infixToPostfix(infix,postfix);
+  printf("Postfix expression: %s\n" , postfix);
+  return 0;
 }
