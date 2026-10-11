@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive visualizer for converting infix expressions to postfix using a stack.">
+  <title>Infix to Postfix — Interactive Stack Visualizer</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #64748b;
+      --border: #dbe2ec;
+      --blue: #2563eb;
+      --blue-soft: #dbeafe;
+      --green: #059669;
+      --green-soft: #d1fae5;
+      --amber: #b45309;
+      --amber-soft: #fef3c7;
+      --red: #dc2626;
+      --shadow: 0 8px 24px rgba(15, 23, 42, .07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b1120;
+        --panel: #111a2c;
+        --text: #e5edf8;
+        --muted: #9aabc2;
+        --border: #29364b;
+        --blue: #60a5fa;
+        --blue-soft: #172b4d;
+        --green: #34d399;
+        --green-soft: #12372f;
+        --amber: #fbbf24;
+        --amber-soft: #3d2d12;
+        --red: #f87171;
+        --shadow: 0 8px 24px rgba(0, 0, 0, .18);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font: 16px/1.55 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+    header { padding: 34px 20px 24px; text-align: center; }
+    header h1 { margin: 0 0 8px; font-size: clamp(1.65rem, 4vw, 2.45rem); line-height: 1.15; }
+    header p { margin: 0 auto; max-width: 720px; color: var(--muted); }
+    main { max-width: 1120px; margin: 0 auto; padding: 0 18px 42px; }
+    .panel {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 18px;
+      padding: 20px; box-shadow: var(--shadow); margin-bottom: 18px;
+    }
+    h2 { margin: 0 0 12px; font-size: 1.18rem; }
+    h3 { margin: 0 0 8px; font-size: 1rem; }
+    .controls { display: grid; grid-template-columns: minmax(180px, 1fr) auto auto; gap: 10px; align-items: end; }
+    label { display: block; font-size: .88rem; color: var(--muted); margin-bottom: 5px; }
+    input {
+      width: 100%; padding: 12px 13px; border: 1px solid var(--border); border-radius: 10px;
+      background: var(--bg); color: var(--text); font: inherit;
+    }
+    button {
+      border: 1px solid var(--border); border-radius: 10px; padding: 11px 15px;
+      background: var(--panel); color: var(--text); font: inherit; font-weight: 650; cursor: pointer;
+      transition: transform .12s ease, opacity .12s ease, background .12s ease;
+    }
+    button:hover:not(:disabled) { transform: translateY(-1px); }
+    button:disabled { opacity: .4; cursor: not-allowed; }
+    button.primary { background: var(--blue); border-color: var(--blue); color: white; }
+    button:focus-visible, input:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+    .examples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+    .examples span { color: var(--muted); font-size: .9rem; }
+    .examples button { padding: 6px 10px; font-size: .9rem; }
+    .message { margin-top: 12px; min-height: 1.5em; color: var(--muted); }
+    .message.error { color: var(--red); }
+    .message.success { color: var(--green); }
+    .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .status-box { border: 1px solid var(--border); border-radius: 14px; padding: 15px; min-width: 0; }
+    .eyebrow { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 750; }
+    .big-value { margin-top: 4px; font: 700 1.45rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; min-height: 1.4em; }
+    .memory-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .memory-card { border: 1px solid var(--border); border-radius: 14px; padding: 15px; min-width: 0; }
+    .stack-area {
+      min-height: 260px; display: flex; flex-direction: column; justify-content: flex-end;
+      align-items: center; gap: 7px; padding: 15px 8px 12px;
+      border: 1px dashed var(--border); border-radius: 12px; background: var(--bg);
+    }
+    .stack-empty { color: var(--muted); font-size: .9rem; margin: auto; }
+    .stack-item {
+      width: min(100%, 220px); display: flex; justify-content: space-between; align-items: center;
+      padding: 9px 12px; border-radius: 9px; border: 1px solid var(--border);
+      background: var(--panel); animation: appear .18s ease-out;
+    }
+    .stack-item.top { border: 2px solid var(--blue); background: var(--blue-soft); }
+    .stack-item .char { font: 800 1.2rem ui-monospace, monospace; }
+    .stack-item small { color: var(--muted); font-size: .75rem; }
+    .top-label { color: var(--blue); font-size: .68rem; font-weight: 800; letter-spacing: .05em; }
+    .array-cells { display: flex; flex-wrap: wrap; gap: 7px; min-height: 60px; align-content: flex-start; }
+    .cell {
+      width: 49px; min-height: 57px; border: 1px solid var(--green); border-radius: 9px;
+      background: var(--green-soft); display: flex; flex-direction: column; justify-content: center; align-items: center;
+      animation: appear .18s ease-out;
+    }
+    .cell strong { font: 800 1.1rem ui-monospace, monospace; }
+    .cell small { font-size: .7rem; color: var(--muted); }
+    .cell.terminator { border-color: var(--amber); background: var(--amber-soft); }
+    .cell.terminator strong { font-size: .85rem; }
+    .empty-output { color: var(--muted); font-size: .9rem; padding: 10px 0; }
+    .progress { height: 7px; background: var(--border); border-radius: 99px; overflow: hidden; margin: 12px 0 6px; }
+    .progress > div { height: 100%; width: 0%; background: var(--blue); transition: width .2s ease; }
+    .step-controls { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 15px; }
+    .step-controls .spacer { flex: 1; }
+    .explanation {
+      padding: 13px 15px; border-radius: 12px; background: var(--blue-soft);
+      border: 1px solid var(--blue); margin-top: 14px;
+    }
+    .explanation strong { display: block; margin-bottom: 3px; }
+    .trace-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    th { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; }
+    tr.current { background: var(--blue-soft); }
+    code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .rules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .rule { padding: 12px; border: 1px solid var(--border); border-radius: 12px; }
+    .rule strong { display: block; margin-bottom: 3px; }
+    footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 8px 16px 28px; }
+    @keyframes appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 720px) {
+      .controls { grid-template-columns: 1fr 1fr; }
+      .controls .input-wrap { grid-column: 1 / -1; }
+      .status-grid, .memory-row, .rules { grid-template-columns: 1fr; }
+      .panel { padding: 15px; }
+      .stack-area { min-height: 190px; }
+      .step-controls .spacer { display: none; }
+      .step-controls button { flex: 1 1 40%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Infix → Postfix Stack Visualizer</h1>
+    <p>Step through the algorithm and watch operators move through the stack while the postfix expression is built. Runs locally in your browser—no libraries or server required.</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>1. Choose an infix expression</h2>
+      <div class="controls">
+        <div class="input-wrap">
+          <label for="expression">Expression (single-character operands, no spaces required)</label>
+          <input id="expression" value="A+B*C" maxlength="90" spellcheck="false" autocomplete="off" aria-describedby="input-help">
+        </div>
+        <button class="primary" id="startBtn">Convert / Reset</button>
+        <button id="autoBtn" title="Automatically step through the conversion">Auto-play ▶</button>
+      </div>
+      <div class="examples">
+        <span>Try an example:</span>
+        <button data-example="A+B*C">A+B*C</button>
+        <button data-example="(A+B)*C">(A+B)*C</button>
+        <button data-example="A^B^C">A^B^C</button>
+        <button data-example="A-B-C">A-B-C</button>
+        <button data-example="(A+B)/(C-D)"> (A+B)/(C-D) </button>
+      </div>
+      <div id="inputHelp" class="message">Supported operators: +, -, *, /, ^ and parentheses. Operands are individual letters or digits.</div>
+      <div id="error" class="message error" role="alert"></div>
+    </section>
+
+    <section class="panel">
+      <h2>2. Current state</h2>
+      <div class="status-grid">
+        <div class="status-box">
+          <div class="eyebrow">Current character</div>
+          <div id="currentChar" class="big-value">—</div>
+          <div id="position" class="message">Ready to start</div>
+        </div>
+        <div class="status-box">
+          <div class="eyebrow">Input expression</div>
+          <div id="inputView" class="big-value">A+B*C</div>
+          <div class="progress"><div id="progressBar"></div></div>
+          <div id="progressText" class="message">0 of 5 characters processed</div>
+        </div>
+      </div>
+      <div class="explanation" aria-live="polite">
+        <strong id="actionTitle">Ready</strong>
+        <span id="actionText">Press “Next step” to begin tracing the algorithm.</span>
+      </div>
+      <div class="step-controls">
+        <button id="prevBtn" disabled>← Previous</button>
+        <button class="primary" id="nextBtn">Next step →</button>
+        <button id="finishBtn">Finish conversion ⏭</button>
+        <span class="spacer"></span>
+        <button id="clearBtn">Reset to start</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>3. Watch memory change</h2>
+      <div class="memory-row">
+        <div class="memory-card">
+          <h3>Operator stack</h3>
+          <p class="message">The top item is highlighted in blue. Index 0 is the bottom of the stack.</p>
+          <div id="stackArea" class="stack-area" aria-label="Current operator stack">
+            <div class="stack-empty">Stack is empty</div>
+          </div>
+          <p class="message"><strong>top = <span id="topValue">-1</span></strong></p>
+        </div>
+        <div class="memory-card">
+          <h3>Postfix output array</h3>
+          <p class="message">Each cell shows the character and its array index. The amber cell marks the C string terminator.</p>
+          <div id="outputCells" class="array-cells"><div class="empty-output">No output yet</div></div>
+          <p class="message"><strong>k = <span id="kValue">0</span></strong></p>
+          <p class="message">Current output: <code id="outputString">(empty)</code></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>4. Execution trace</h2>
+      <div class="trace-wrap">
+        <table>
+          <thead><tr><th>Step</th><th>Character</th><th>Action</th><th>Stack</th><th>Postfix</th></tr></thead>
+          <tbody id="traceBody">
+            <tr><td colspan="5">Start a conversion to create the trace.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>5. The rules behind the animation</h2>
+      <div class="rules">
+        <div class="rule"><strong>Operand</strong>Letters and digits go straight into the postfix output.</div>
+        <div class="rule"><strong>Opening parenthesis <code>(</code></strong>Push it as a boundary marker.</div>
+        <div class="rule"><strong>Closing parenthesis <code>)</code></strong>Pop operators until <code>(</code>, then discard the parenthesis.</div>
+        <div class="rule"><strong>Operator</strong>Pop higher-precedence operators first. For equal precedence, pop first when the current operator is left-associative.</div>
+        <div class="rule"><strong>End of input</strong>Pop remaining operators, then append the null terminator <code>\\0</code>.</div>
+        <div class="rule"><strong>Associativity</strong><code>^</code> is right-associative, so <code>A^B^C</code> becomes <code>ABC^^</code>.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>Educational visualizer • Vanilla HTML, CSS and JavaScript • No dependencies</footer>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const expressionInput = $('expression');
+    let timeline = [];
+    let stepIndex = 0;
+    let timer = null;
+
+    const precedence = (op) => ({ '+': 1, '-': 1, '*': 2, '/': 2, '^': 3 }[op] ?? -1);
+    const isRightAssociative = (op) => op === '^';
+    const isOperand = (ch) => /^[a-zA-Z0-9]$/.test(ch);
+    const operators = new Set(['+', '-', '*', '/', '^']);
+
+    function validateExpression(raw) {
+      const expr = raw.replace(/\s+/g, '');
+      if (!expr) return 'Enter an expression first.';
+      if (expr.length > 90) return 'Please keep the expression to 90 characters or fewer.';
+      let depth = 0;
+      for (const ch of expr) {
+        if (!isOperand(ch) && !operators.has(ch) && ch !== '(' && ch !== ')') {
+          return `Unsupported character: "${ch}". Use letters, digits, +, -, *, /, ^ and parentheses.`;
+        }
+        if (ch === '(') depth++;
+        if (ch === ')') {
+          depth--;
+          if (depth < 0) return 'There is a closing parenthesis without a matching opening parenthesis.';
+        }
+      }
+      if (depth !== 0) return 'There is an opening parenthesis without a matching closing parenthesis.';
+      if (expr.length > 1 && (operators.has(expr[0]) && expr[0] !== '-' || operators.has(expr.at(-1)))) {
+        return 'This visualizer expects a valid infix expression with an operand at each end.';
+      }
+      return '';
+    }
+
+    function snapshot(state, current, actionTitle, actionText, processed, phase = 'normal') {
+      timeline.push({
+        current, actionTitle, actionText, processed, phase,
+        stack: [...state.stack], output: state.output, top: state.stack.length - 1,
+        k: state.output.length
+      });
+    }
+
+    function buildTimeline(expr) {
+      const state = { stack: [], output: '' };
+      timeline = [];
+      snapshot(state, '—', 'Ready', 'The stack is empty. The postfix output has no characters yet.', 0, 'start');
+
+      for (let i = 0; i < expr.length; i++) {
+        const c = expr[i];
+        const before = state.output;
+        const stackBefore = [...state.stack];
+
+        if (isOperand(c)) {
+          state.output += c;
+          snapshot(state, c, 'Operand: append directly', `“${c}” is a letter or digit, so it is written to postfix at index ${state.output.length - 1}. k increases to ${state.output.length}.`, i + 1);
+        } else if (c === '(') {
+          state.stack.push(c);
+          snapshot(state, c, 'Opening parenthesis: push', 'Push “(” as a boundary marker. Operators outside this parenthesis must not be popped while its contents are processed.', i + 1);
+        } else if (c === ')') {
+          const popped = [];
+          while (state.stack.length && state.stack[state.stack.length - 1] !== '(') {
+            const op = state.stack.pop();
+            state.output += op;
+            popped.push(op);
+          }
+          const hadOpen = state.stack[state.stack.length - 1] === '(';
+          if (hadOpen) state.stack.pop();
+          const description = popped.length
+            ? `Pop ${popped.map(x => `“${x}”`).join(', ')} into postfix, then discard “(”.`
+            : 'No operators are above “(”. Discard the opening parenthesis; parentheses are not written to postfix.';
+          snapshot(state, c, 'Closing parenthesis: pop to (', description, i + 1);
+        } else if (operators.has(c)) {
+          const popped = [];
+          while (state.stack.length) {
+            const top = state.stack[state.stack.length - 1];
+            if (top === '(') break;
+            const higher = precedence(top) > precedence(c);
+            const equalAndLeft = precedence(top) === precedence(c) && !isRightAssociative(c);
+            if (!(higher || equalAndLeft)) break;
+            state.output += state.stack.pop();
+            popped.push(top);
+          }
+          state.stack.push(c);
+          let reason;
+          if (popped.length) {
+            reason = `Pop ${popped.map(x => `“${x}”`).join(', ')} first, then push “${c}”.`;
+          } else if (stackBefore.length && stackBefore[stackBefore.length - 1] === '(') {
+            reason = `The stack top is “(”, so it acts as a boundary. Push “${c}” without popping across the parenthesis.`;
+          } else {
+            reason = `No operator on top needs to be output first. Push “${c}” onto the stack.`;
+          }
+          snapshot(state, c, 'Operator: compare precedence', reason, i + 1);
+        }
+
+        // Guard against malformed operator sequences so the demo doesn't misleadingly
+        // present them as valid expressions.
+        if (i > 0 && operators.has(c) && operators.has(expr[i - 1])) {
+          timeline = [];
+          throw new Error('Two operators appear next to each other. This visualizer supports basic binary expressions only.');
+        }
+        if (c === '(' && i > 0 && (isOperand(expr[i - 1]) || expr[i - 1] === ')')) {
+          timeline = [];
+          throw new Error('Add an operator before the opening parenthesis.');
+        }
+        if (c === ')' && i > 0 && operators.has(expr[i - 1])) {
+          timeline = [];
+          throw new Error('An operator cannot appear immediately before a closing parenthesis.');
+        }
+      }
+
+      while (state.stack.length) {
+        const op = state.stack.pop();
+        if (op === '(') {
+          timeline = [];
+          throw new Error('Unmatched opening parenthesis.');
+        }
+        state.output += op;
+        snapshot(state, 'End', 'End of input: pop remaining operators', `Pop “${op}” from the stack and append it to postfix.`, expr.length, 'cleanup');
+      }
+      snapshot(state, 'End', 'Append string terminator', `Store the C null terminator '\\0' at postfix[${state.output.length}]. It marks the end of the string; it is not part of the visible postfix expression.`, expr.length, 'done');
+      return timeline;
+    }
+
+    function stopAuto() {
+      if (timer) clearInterval(timer);
+      timer = null;
+      $('autoBtn').textContent = 'Auto-play ▶';
+    }
+
+    function render() {
+      const s = timeline[stepIndex];
+      if (!s) return;
+      $('currentChar').textContent = s.current;
+      $('position').textContent = s.phase === 'start' ? 'Before the first character' :
+        s.current === 'End' ? 'End-of-input processing' : `Processed ${s.processed} character${s.processed === 1 ? '' : 's'}`;
+      $('inputView').textContent = expressionInput.value.replace(/\s+/g, '');
+      const total = expressionInput.value.replace(/\s+/g, '').length;
+      $('progressBar').style.width = `${Math.min(100, (s.processed / Math.max(total, 1)) * 100)}%`;
+      $('progressText').textContent = `${s.processed} of ${total} input characters processed`;
+      $('actionTitle').textContent = s.actionTitle;
+      $('actionText').textContent = s.actionText;
+      $('topValue').textContent = s.top;
+      $('kValue').textContent = s.k;
+      $('outputString').textContent = s.output || '(empty)';
+
+      const stackArea = $('stackArea');
+      stackArea.replaceChildren();
+      if (!s.stack.length) {
+        const empty = document.createElement('div');
+        empty.className = 'stack-empty';
+        empty.textContent = 'Stack is empty';
+        stackArea.appendChild(empty);
+      } else {
+        s.stack.forEach((ch, i) => {
+          const item = document.createElement('div');
+          item.className = 'stack-item' + (i === s.stack.length - 1 ? ' top' : '');
+          const left = document.createElement('span');
+          left.className = 'char';
+          left.textContent = ch;
+          const right = document.createElement('span');
+          right.innerHTML = `<small>stack[${i}]</small>${i === s.stack.length - 1 ? '<div class="top-label">TOP</div>' : ''}`;
+          item.append(left, right);
+          stackArea.appendChild(item);
+        });
+      }
+
+      const outputCells = $('outputCells');
+      outputCells.replaceChildren();
+      if (!s.output.length && s.phase !== 'done') {
+        const empty = document.createElement('div');
+        empty.className = 'empty-output';
+        empty.textContent = 'No output yet';
+        outputCells.appendChild(empty);
+      } else {
+        [...s.output].forEach((ch, i) => {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          const strong = document.createElement('strong');
+          strong.textContent = ch;
+          const small = document.createElement('small');
+          small.textContent = `[${i}]`;
+          cell.append(strong, small);
+          outputCells.appendChild(cell);
+        });
+        if (s.phase === 'done') {
+          const cell = document.createElement('div');
+          cell.className = 'cell terminator';
+          const strong = document.createElement('strong');
+          strong.textContent = '\\0';
+          const small = document.createElement('small');
+          small.textContent = `[${s.output.length}]`;
+          cell.append(strong, small);
+          outputCells.appendChild(cell);
+        }
+      }
+
+      $('prevBtn').disabled = stepIndex === 0;
+      $('nextBtn').disabled = stepIndex === timeline.length - 1;
+      $('finishBtn').disabled = stepIndex === timeline.length - 1;
+      $('traceBody').replaceChildren();
+      timeline.slice(1, stepIndex + 1).forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        if (idx === stepIndex - 1) tr.className = 'current';
+        const vals = [idx + 1, row.current, row.actionTitle, row.stack.length ? row.stack.join(' ') : 'Empty', row.output || '—'];
+        vals.forEach(v => {
+          const td = document.createElement('td');
+          td.textContent = v;
+          tr.appendChild(td);
+        });
+        $('traceBody').appendChild(tr);
+      });
+      if (stepIndex === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 5;
+        td.textContent = 'No steps executed yet.';
+        tr.appendChild(td);
+        $('traceBody').appendChild(tr);
+      }
+    }
+
+    function loadExpression() {
+      stopAuto();
+      $('error').textContent = '';
+      const expr = expressionInput.value.replace(/\s+/g, '');
+      const error = validateExpression(expr);
+      if (error) {
+        $('error').textContent = error;
+        return;
+      }
+      try {
+        buildTimeline(expr);
+        stepIndex = 0;
+        render();
+      } catch (err) {
+        $('error').textContent = err.message;
+      }
+    }
+
+    $('startBtn').addEventListener('click', loadExpression);
+    $('clearBtn').addEventListener('click', () => { stepIndex = 0; stopAuto(); render(); });
+    $('nextBtn').addEventListener('click', () => {
+      stopAuto();
+      if (stepIndex < timeline.length - 1) stepIndex++;
+      render();
+    });
+    $('prevBtn').addEventListener('click', () => {
+      stopAuto();
+      if (stepIndex > 0) stepIndex--;
+      render();
+    });
+    $('finishBtn').addEventListener('click', () => {
+      stopAuto();
+      stepIndex = timeline.length - 1;
+      render();
+    });
+    $('autoBtn').addEventListener('click', () => {
+      if (timer) { stopAuto(); return; }
+      if (stepIndex >= timeline.length - 1) stepIndex = 0;
+      $('autoBtn').textContent = 'Pause ⏸';
+      timer = setInterval(() => {
+        if (stepIndex < timeline.length - 1) {
+          stepIndex++;
+          render();
+        } else {
+          stopAuto();
+        }
+      }, 1100);
+      render();
+    });
+    document.querySelectorAll('[data-example]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        expressionInput.value = btn.dataset.example.trim();
+        loadExpression();
+      });
+    });
+    expressionInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') loadExpression();
+    });
+
+    loadExpression();
+  </script>
+</body>
+</html>
