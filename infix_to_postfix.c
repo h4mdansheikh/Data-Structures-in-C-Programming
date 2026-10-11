@@ -57,10 +57,10 @@ void infixtoPostfix(char infix[], char postfix[]){
 }
 
 int main(){
-  char int[MAX],postfix[MAX];
+  char infix[MAX],postfix[MAX];
   printf("Enter infix expression(No SPACES): ");
   scanf("%s",infix);
-  infixToPostfix(infix,postfix);
+  infixtoPostfix(infix,postfix);
   printf("Postfix expression: %s\n" , postfix);
   return 0;
 }
